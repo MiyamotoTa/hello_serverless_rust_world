@@ -1,6 +1,6 @@
 # hello_serverless_rust_world
 
-ServerlessFramework を用いた Rust 開発のサンプルリポジトリ。
+[serverless framework](https://www.serverless.com) を用いた Rust 開発のサンプルリポジトリ。
 
 ## Requirements
 
@@ -9,7 +9,7 @@ ServerlessFramework を用いた Rust 開発のサンプルリポジトリ。
 
 ## ディレクトリ作成
 
-プロジェクトディレクトリを作成し、ServerlessFramework 関係のライブラリをインストールする。
+プロジェクトディレクトリを作成し、serverless framework 関係のライブラリをインストールする。
 Rust のマニフェストファイルである `Cargo.toml` を作成する。
 
 ```bash
@@ -20,7 +20,7 @@ $ touch serverless.yml
 $ touch Cargo.toml
 ```
 
-ServerlessFramework の設定を[serverless.yml](./serverless.yml)に記述する。
+serverless framework の設定を[serverless.yml](./serverless.yml)に記述する。
 その他の設定は [Reference](https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml/#serverlessyml-reference/)を参照。
 
 ```yaml
@@ -219,7 +219,7 @@ $ sls invoke local -f users --path users/test/resources/get_users_request.json
 
 users クレートにユーザを新規作成するエンドポイント `[POST] /users` を追加する。
 
-### ServerlessFramework
+### serverless framework
 
 [serverless.yml](./serverless.yml)に以下の設定を追記する。
 
