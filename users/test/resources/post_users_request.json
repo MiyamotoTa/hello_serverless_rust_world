@@ -1,0 +1,21 @@
+{
+  "path": "/users",
+  "httpMethod": "POST",
+  "headers": {
+    "Host": "example.com"
+  },
+  "requestContext": {
+    "accountId": "",
+    "resourceId": "",
+    "stage": "development",
+    "requestId": "",
+    "identity": {
+      "sourceIp": ""
+    },
+    "resourcePath": "",
+    "httpMethod": "",
+    "apiId": ""
+  },
+  "queryStringParameters": null,
+  "body": "{\"username\":\"new user\", \"email\": \"new_user@example.com\"}"
+}

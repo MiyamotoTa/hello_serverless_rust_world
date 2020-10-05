@@ -23,6 +23,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn routes(req: Request, con: Context) -> Result<impl IntoResponse, HandlerError> {
     match req.method().as_str() {
+        "POST" => create_user(req, con),
         "GET" => get_user(req, con),
         _ => {
             log::error!("Method not allowed");
@@ -48,4 +49,23 @@ fn get_user(_: Request, _: Context) -> Result<Response<Body>, HandlerError> {
         },
     ];
     Ok(serde_json::json!(users).into_response())
+}
+
+fn create_user(req: Request, _: Context) -> Result<Response<Body>, HandlerError> {
+    match serde_json::from_slice::<User>(req.body().as_ref()) {
+        Ok(user) => {
+            let res = Response::builder()
+                .status(StatusCode::CREATED)
+                .body(Body::Text(serde_json::json!(user).to_string()))
+                .unwrap();
+            Ok(res)
+        }
+        Err(e) => {
+            log::error!("error {}", e);
+            Ok(Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .body("Bad request".into())
+                .expect("err creating response"))
+        }
+    }
 }

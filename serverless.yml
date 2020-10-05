@@ -14,3 +14,6 @@ functions:
       - http:
           path: /users
           method: get
+      - http:
+          path: /users
+          method: post
