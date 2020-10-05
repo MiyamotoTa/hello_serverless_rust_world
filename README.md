@@ -20,7 +20,7 @@ $ touch serverless.yml
 $ touch Cargo.toml
 ```
 
-ServerlessFramework の設定を記述する。
+ServerlessFramework の設定を[serverless.yml](./serverless.yml)に記述する。
 その他の設定は [Reference](https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml/#serverlessyml-reference/)を参照。
 
 ```yaml
@@ -34,7 +34,7 @@ package:
   individually: true
 ```
 
-Rust の設定を記述する。
+Rust の設定を[Cargo.toml](./Cargo.toml)に記述する。
 各エンドポイント別にクレート（Rust のライブラリを表す単位）を作成していくので、 [Cargo.toml] は以下のように記述しておく。
 
 ```toml
@@ -62,7 +62,7 @@ users
     └── main.rs
 ```
 
-プロジェクトディレクトリにある [Cargo.toml](./Cargo.toml)に users クレートをワークスペースとして追加する。
+プロジェクトルートにある [Cargo.toml](./Cargo.toml)に users クレートをワークスペースとして追加する。
 
 ```toml
 [workspace]
@@ -71,7 +71,7 @@ members = [
 ]
 ```
 
-users クレートに必要なライブラリを [Cargo.toml](./users/Cargo.toml)に追加しビルドする。
+users クレートに必要なライブラリを [users/Cargo.toml](./users/Cargo.toml)に追加しビルドする。
 
 ```toml
 [dependencies]
@@ -162,13 +162,8 @@ functions:
 
 ### リクエストファイルの作成
 
-ローカルテスト用のリクエストファイルを作成します。
+ローカルテスト用のリクエストファイル[get_users_request.json](./users/test/resources/get_users_request.json)を作成する。
 単なる GET リクエストの場合でもローカル実行の際にこのファイルが必要になる。
-
-```bash
-$ mkdir -p users/test/resources && cd $_
-$ touch get_users_request.json
-```
 
 ```json
 {
@@ -226,7 +221,7 @@ users クレートにユーザを新規作成するエンドポイント `[POST]
 
 ### ServerlessFramework
 
-[./serverless.yml]に以下の設定を追記する。
+[serverless.yml](./serverless.yml)に以下の設定を追記する。
 
 ```yaml
 - http:
@@ -283,7 +278,7 @@ fn routes(req: Request, con: Context) -> Result<impl IntoResponse, HandlerError>
 ### リクエストファイルの作成
 
 ローカル実行用のリクエストファイル [post_users_request.json](./users/test/resources/post_users_request.json)を作成する。
-GET のときと異なる点として、 `body` プロパティを追加している。
+`get_users_request.json` と異なる点としては、 `body` プロパティを追加している。
 
 ```json
 {
