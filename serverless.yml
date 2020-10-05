@@ -1,0 +1,16 @@
+service: hello-serverless-rust-world
+provider:
+  name: aws
+  runtime: rust
+plugins:
+  - serverless-rust
+package:
+  individually: true
+
+functions:
+  users:
+    handler: users
+    events:
+      - http:
+          path: /users
+          method: get
