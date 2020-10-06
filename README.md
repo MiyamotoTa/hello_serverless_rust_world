@@ -35,7 +35,7 @@ package:
 ```
 
 Rust の設定を[Cargo.toml](./Cargo.toml)に記述する。
-各エンドポイント別にクレート（Rust のライブラリを表す単位）を作成していくので、 [Cargo.toml] は以下のように記述しておく。
+各エンドポイント別にクレート（Rust のライブラリを表す単位）を作成していくので、 Cargo.toml は以下のように記述しておく。
 
 ```toml
 [workspace]
