@@ -12,8 +12,12 @@ functions:
     handler: users
     events:
       - http:
-          path: /users
+          path: /users/{user_id}
           method: get
+          request:
+            parameters:
+              paths:
+                user_id: true
       - http:
           path: /users
           method: post

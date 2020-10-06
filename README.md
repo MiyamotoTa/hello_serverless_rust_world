@@ -330,3 +330,146 @@ REPORT RequestId: cfff52df-03df-10e8-6c1d-4f9aeee03a74  Init Duration: 44.84 ms 
 
 {"statusCode":201,"headers":{},"multiValueHeaders":{},"body":"{\"email\":\"new_user@example.com\",\"username\":\"new user\"}","isBase64Encoded":false}
 ```
+
+## パスパラメータを処理するエンドポイント
+
+パスパラメータ指定のユーザを取得するエンドポイント `[GET] /users/{user_id}` を追加する。
+
+### RequestExtの追加
+
+パスパラメータを Request から取得するため、 [main.rs](./users/src/main.rs)に `RequestExt` を追加する。 
+
+```rust
+use lambda_http::{lambda, Body, IntoResponse, Request, RequestExt};
+```
+
+`routes` function を以下のように変更する。
+
+```rust
+fn routes(req: Request, con: Context) -> Result<impl IntoResponse, HandlerError> {
+    match req.method().as_str() {
+        "POST" => create_user_handler(req, con),
+        "GET" => get_user_handler(req, con),
+        _ => {
+            log::error!("Method not allowed");
+            let res = Response::builder()
+                .status(StatusCode::METHOD_NOT_ALLOWED)
+                .body(Body::Text("Method not allowed".to_string()))
+                .unwrap();
+
+            Ok(res)
+        }
+    }
+}
+
+fn get_user_handler(req: Request, _: Context) -> Result<Response<Body>, HandlerError> {
+    let path_params = req.path_parameters();
+    log::info!("path: {:?}", path_params);
+    match path_params.get("user_id") {
+        Some(user_id) => get_user(user_id.parse().unwrap()),
+        None => get_users(),
+    }
+}
+
+fn get_user(user_id: u64) -> Result<Response<Body>, HandlerError> {
+    let user = User {
+        username: format!("username_{}", user_id),
+        email: "test@example.com".to_string(),
+    };
+    Ok(serde_json::json!(user).into_response())
+}
+
+fn get_users() -> Result<Response<Body>, HandlerError> {
+    let users = vec![
+        User {
+            username: "test_user1".to_string(),
+            email: "example1@example.com".to_string(),
+        },
+        User {
+            username: "test_user2".to_string(),
+            email: "example2@example.com".to_string(),
+        },
+    ];
+    Ok(serde_json::json!(users).into_response())
+}
+```
+
+### ハンドラの追加
+
+[serverless.yml](./serverless.yml) の HTTP エンドポイント設定を変更する。
+
+```yaml
+events:
+  - http:
+      path: /users/{user_id}
+      method: get
+      request:
+        parameters:
+          paths:
+            user_id: true
+```
+
+### リクエストファイルの作成
+
+ローカル実行用のリクエストファイル [get_user_request.json](./users/test/resources/get_user_request.json)を作成する。
+パスパラメータは以下のように指定する。
+
+```json
+"pathParameters": {
+  "user_id": "123"
+}
+```
+
+### ローカル実行
+
+`sls invoke local` コマンドを実行する。
+
+```bash
+$ sls invoke local -f users --path users/test/resources/get_user_request.json 
+  Serverless: Running "serverless" installed locally (in service node_modules)
+  Serverless: Configuration warning at 'provider.runtime': should be equal to one of the allowed values [dotnetcore2.1, dotnetcore3.1, go1.x, java11, java8, java8.al2, nodejs10.x, nodejs12.x, provided, provided.al2, python2.7, python3.6, python3.7, python3.8, ruby2.5, ruby2.7]
+  Serverless:  
+  Serverless: Learn more about configuration validation here: http://slss.io/configuration-validation
+  Serverless:  
+  Serverless: Building Rust users func...
+  Serverless: Running containerized build
+      Finished release [optimized] target(s) in 1.71s
+  objcopy: stICxflu: debuglink section already exists
+    adding: bootstrap (deflated 60%)
+  Serverless: Packaging service...
+  Serverless: Downloading base Docker image...
+  START RequestId: 5e5ee1e3-ba65-115f-6d75-2c9b00d195df Version: $LATEST
+  2020-10-06 12:36:26,897 INFO  [lambda_runtime_core::runtime] Received new event with AWS request id: 5e5ee1e3-ba65-115f-6d75-2c9b00d195df
+  2020-10-06 12:36:26,897 INFO  [users] path: StrMap({"user_id": ["123"]})
+  2020-10-06 12:36:26,898 INFO  [lambda_runtime_core::runtime] Response for 5e5ee1e3-ba65-115f-6d75-2c9b00d195df accepted by Runtime API
+  END RequestId: 5e5ee1e3-ba65-115f-6d75-2c9b00d195df
+  REPORT RequestId: 5e5ee1e3-ba65-115f-6d75-2c9b00d195df  Init Duration: 45.98 ms Duration: 3.53 ms       Billed Duration: 100 ms Memory Size: 1024 MB    Max Memory Used: 11 MB  
+  
+  {"statusCode":200,"headers":{"content-type":"application/json"},"multiValueHeaders":{"content-type":["application/json"]},"body":"{\"email\":\"test@example.com\",\"username\":\"username_123\"}","isBase64Encoded":false}
+```
+
+[serverless.yml](./serverless.yml) の設定で `user_id: true` としていたが、 `get_users_request.json` も実行したところレスポンスが返却された。
+
+```bash
+$ sls invoke local -f users --path users/test/resources/get_users_request.json
+  Serverless: Running "serverless" installed locally (in service node_modules)
+  Serverless: Configuration warning at 'provider.runtime': should be equal to one of the allowed values [dotnetcore2.1, dotnetcore3.1, go1.x, java11, java8, java8.al2, nodejs10.x, nodejs12.x, provided, provided.al2, python2.7, python3.6, python3.7, python3.8, ruby2.5, ruby2.7]
+  Serverless:  
+  Serverless: Learn more about configuration validation here: http://slss.io/configuration-validation
+  Serverless:  
+  Serverless: Building Rust users func...
+  Serverless: Running containerized build
+      Finished release [optimized] target(s) in 1.88s
+  objcopy: stKxwvop: debuglink section already exists
+    adding: bootstrap (deflated 60%)
+  Serverless: Packaging service...
+  Serverless: Downloading base Docker image...
+  START RequestId: 40f2d903-65b0-12ea-5cda-6c9f9a897d67 Version: $LATEST
+  2020-10-06 12:32:24,690 INFO  [lambda_runtime_core::runtime] Received new event with AWS request id: 40f2d903-65b0-12ea-5cda-6c9f9a897d67
+  2020-10-06 12:32:24,691 INFO  [users] path: StrMap({})
+  2020-10-06 12:32:24,692 INFO  [lambda_runtime_core::runtime] Response for 40f2d903-65b0-12ea-5cda-6c9f9a897d67 accepted by Runtime API
+  END RequestId: 40f2d903-65b0-12ea-5cda-6c9f9a897d67
+  REPORT RequestId: 40f2d903-65b0-12ea-5cda-6c9f9a897d67  Init Duration: 45.22 ms Duration: 3.89 ms       Billed Duration: 100 ms Memory Size: 1024 MB    Max Memory Used: 11 MB  
+  
+  {"statusCode":200,"headers":{"content-type":"application/json"},"multiValueHeaders":{"content-type":["application/json"]},"body":"[{\"email\":\"example1@example.com\",\"username\":\"test_user1\"},{\"email\":\"example2@example.com\",\"username\":\"test_user2\"}]","isBase64Encoded":false}
+```

@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use http::{Response, StatusCode};
-use lambda_http::{lambda, Body, IntoResponse, Request};
+use lambda_http::{lambda, Body, IntoResponse, Request, RequestExt};
 use lambda_runtime::Context;
 use lambda_runtime_errors::HandlerError;
 use log::LevelFilter;
@@ -23,8 +23,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn routes(req: Request, con: Context) -> Result<impl IntoResponse, HandlerError> {
     match req.method().as_str() {
-        "POST" => create_user(req, con),
-        "GET" => get_user(req, con),
+        "POST" => create_user_handler(req, con),
+        "GET" => get_user_handler(req, con),
         _ => {
             log::error!("Method not allowed");
             let res = Response::builder()
@@ -37,7 +37,24 @@ fn routes(req: Request, con: Context) -> Result<impl IntoResponse, HandlerError>
     }
 }
 
-fn get_user(_: Request, _: Context) -> Result<Response<Body>, HandlerError> {
+fn get_user_handler(req: Request, _: Context) -> Result<Response<Body>, HandlerError> {
+    let path_params = req.path_parameters();
+    log::info!("path: {:?}", path_params);
+    match path_params.get("user_id") {
+        Some(user_id) => get_user(user_id.parse().unwrap()),
+        None => get_users(),
+    }
+}
+
+fn get_user(user_id: u64) -> Result<Response<Body>, HandlerError> {
+    let user = User {
+        username: format!("username_{}", user_id),
+        email: "test@example.com".to_string(),
+    };
+    Ok(serde_json::json!(user).into_response())
+}
+
+fn get_users() -> Result<Response<Body>, HandlerError> {
     let users = vec![
         User {
             username: "test_user1".to_string(),
@@ -51,7 +68,7 @@ fn get_user(_: Request, _: Context) -> Result<Response<Body>, HandlerError> {
     Ok(serde_json::json!(users).into_response())
 }
 
-fn create_user(req: Request, _: Context) -> Result<Response<Body>, HandlerError> {
+fn create_user_handler(req: Request, _: Context) -> Result<Response<Body>, HandlerError> {
     match serde_json::from_slice::<User>(req.body().as_ref()) {
         Ok(user) => {
             let res = Response::builder()

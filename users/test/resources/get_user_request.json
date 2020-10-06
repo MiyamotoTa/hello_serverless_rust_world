@@ -1,0 +1,23 @@
+{
+  "path": "/users",
+  "httpMethod": "GET",
+  "headers": {
+    "Host": "example.com"
+  },
+  "requestContext": {
+    "accountId": "",
+    "resourceId": "",
+    "stage": "development",
+    "requestId": "",
+    "identity": {
+      "sourceIp": ""
+    },
+    "resourcePath": "",
+    "httpMethod": "",
+    "apiId": ""
+  },
+  "queryStringParameters": null,
+  "pathParameters": {
+    "user_id": "123"
+  }
+}
