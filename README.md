@@ -277,7 +277,7 @@ fn routes(req: Request, con: Context) -> Result<impl IntoResponse, HandlerError>
 
 ### リクエストファイルの作成
 
-ローカル実行用のリクエストファイル [post_users_request.json](./users/test/resources/post_users_request.json)を作成する。
+ローカル実行用のリクエストファイル [post_users_request.json](post_users/test/resources/post_users_request.json)を作成する。
 `get_users_request.json` と異なる点としては、 `body` プロパティを追加している。
 
 ```json

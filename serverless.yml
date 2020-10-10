@@ -18,6 +18,9 @@ functions:
             parameters:
               paths:
                 user_id: true
+  create_users:
+    handler: post_users
+    events:
       - http:
           path: /users
           method: post
