@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "get_user_by_id",
+    "get_users",
     "post_users",
     "users"
 ]

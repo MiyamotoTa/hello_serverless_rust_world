@@ -162,7 +162,7 @@ functions:
 
 ### リクエストファイルの作成
 
-ローカルテスト用のリクエストファイル[get_users_request.json](./users/test/resources/get_users_request.json)を作成する。
+ローカルテスト用のリクエストファイル[get_users_request.json](get_users/test/resources/get_users_request.json)を作成する。
 単なる GET リクエストの場合でもローカル実行の際にこのファイルが必要になる。
 
 ```json
