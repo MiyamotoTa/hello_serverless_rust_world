@@ -20,8 +20,8 @@ $ touch serverless.yml
 $ touch Cargo.toml
 ```
 
-serverless framework の設定を[serverless.yml](./serverless.yml)に記述する。
-その他の設定は [Reference](https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml/#serverlessyml-reference/)を参照。
+serverless framework の設定を [serverless.yml](./serverless.yml) に記述する。
+その他の設定は [Reference](https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml/#serverlessyml-reference/) を参照。
 
 ```yaml
 service: hello-serverless-rust-world
@@ -34,7 +34,7 @@ package:
   individually: true
 ```
 
-Rust の設定を[Cargo.toml](./Cargo.toml)に記述する。
+Rust の設定を [Cargo.toml](./Cargo.toml) に記述する。
 各エンドポイント別にクレート（Rust のライブラリを表す単位）を作成していくので、 Cargo.toml は以下のように記述しておく。
 
 ```toml
@@ -87,7 +87,7 @@ simple_logger = "1.10.0"
 
 ### ハンドラの作成
 
-[main.rs](./users/src/main.rs)にハンドラを記述する。
+`main.rs` にハンドラを記述する。
 HTTP メソッドが GET 以外の場合は、ステータスコード 405 を返す。
 GET の場合はユーザの一覧を取得する。
 
@@ -231,7 +231,7 @@ users クレートにユーザを新規作成するエンドポイント `[POST]
 
 ### POST ハンドラの追加
 
-ユーザを新規作成する関数を[main.rs](./users/src/main.rs)に追記する。
+ユーザを新規作成する関数を `main.rs` に追記する。
 HTTP メソッドが POST の場合に、body に与えられた JSON 文字列を Serialize し、ステータスコード 201 を返す。
 
 ```rust
@@ -337,7 +337,7 @@ REPORT RequestId: cfff52df-03df-10e8-6c1d-4f9aeee03a74  Init Duration: 44.84 ms 
 
 ### RequestExtの追加
 
-パスパラメータを Request から取得するため、 [main.rs](./users/src/main.rs)に `RequestExt` を追加する。 
+パスパラメータを Request から取得するため、 `main.rs` に `RequestExt` を追加する。 
 
 ```rust
 use lambda_http::{lambda, Body, IntoResponse, Request, RequestExt};
@@ -472,4 +472,49 @@ $ sls invoke local -f users --path users/test/resources/get_users_request.json
   REPORT RequestId: 40f2d903-65b0-12ea-5cda-6c9f9a897d67  Init Duration: 45.22 ms Duration: 3.89 ms       Billed Duration: 100 ms Memory Size: 1024 MB    Max Memory Used: 11 MB  
   
   {"statusCode":200,"headers":{"content-type":"application/json"},"multiValueHeaders":{"content-type":["application/json"]},"body":"[{\"email\":\"example1@example.com\",\"username\":\"test_user1\"},{\"email\":\"example2@example.com\",\"username\":\"test_user2\"}]","isBase64Encoded":false}
+```
+
+## エンドポイント別にCrate分割
+
+これまでは `users` クレートに全てのコードを書いていた。
+ここからはコードの見通しをよくするためエンドポイント別にCrateを分割していく。
+
+### クレートの新規作成
+
+`[POST] /users` を処理するためのクレートを作成する。
+
+```bash
+$ cargo new get_user_by_id
+```
+
+プロジェクトルートの [Cargo.toml](./Cargo.toml) にクレートを追記する。
+
+```toml
+[workspace]
+members = [
+    "get_user_by_id",
+    "users"
+]
+```
+
+### ハンドラの切り出し
+
+`users` クレートの記述を `get_users_by_id/src/main.rs` に切り出す。 
+
+### 作成したハンドラを登録する
+
+[serverless.yml](./serverless.yml) を編集し、ハンドラを登録する。
+
+```yaml
+functions:
+  get_user_by_id:
+    handler: get_user_by_id
+    events:
+      - http:
+          path: /users/{user_id}
+          method: get
+          request:
+            parameters:
+              paths:
+                user_id: true
 ```
