@@ -411,7 +411,7 @@ events:
 
 ### リクエストファイルの作成
 
-ローカル実行用のリクエストファイル [get_user_request.json](./users/test/resources/get_user_request.json)を作成する。
+ローカル実行用のリクエストファイル [get_user_request.json](get_user_by_id/test/resources/get_user_request.json)を作成する。
 パスパラメータは以下のように指定する。
 
 ```json
