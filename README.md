@@ -518,3 +518,5 @@ functions:
               paths:
                 user_id: true
 ```
+
+この作業を繰り返してエンドポイント別にcrate分割を行っていく。
